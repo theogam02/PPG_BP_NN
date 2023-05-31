@@ -29,15 +29,27 @@ def splitFiles(case):
     sbpData = pd.read_csv('Data/Case' + str(case) + '/track4.csv')
     dbpData = pd.read_csv('Data/Case' + str(case) + '/track2.csv')
 
-    ppgGaps = checkGaps(ppgData, 'ppg')
-    sbpGaps = checkGaps(sbpData, 'bp')
-    dbpGaps = checkGaps(dbpData, 'bp')
-    gapsOverall = ppgGaps + sbpGaps + dbpGaps
-    print(gapsOverall)
-
     # Cut off any excess measurements from the tracks
-    minLen = min(len(ppgData), len(sbpData), len(dbpData))
-    print(minLen)
+    startTime = max(ppgData.iloc[0]['Time'], sbpData.iloc[0]['Time'], dbpData.iloc[0]['Time'])
+    endTime = min(ppgData.iloc[-1]['Time'], sbpData.iloc[-1]['Time'], dbpData.iloc[-1]['Time'])
+
+    print('Startime:', startTime, 'Endtime:', endTime)
+
+    ppgData = ppgData.loc[startTime <= ppgData['Time']]
+    ppgData = ppgData.loc[ppgData['Time'] <= endTime]
+    sbpData = sbpData.loc[startTime <= sbpData['Time']]
+    sbpData = sbpData.loc[sbpData['Time'] <= endTime]
+    dbpData = dbpData.loc[startTime <= dbpData['Time']]
+    dbpData = dbpData.loc[dbpData['Time'] <= endTime]
+
+    print('Startimes: ', ppgData.iloc[0]['Time'], sbpData.iloc[0]['Time'], dbpData.iloc[0]['Time'])
+
+    # ppgGaps = checkGaps(ppgData, 'ppg')
+    # sbpGaps = checkGaps(sbpData, 'bp')
+    # dbpGaps = checkGaps(dbpData, 'bp')
+    # gapsOverall = ppgGaps + sbpGaps + dbpGaps
+    # gapsOverall = ppgGaps
+    # print(gapsOverall)
 
     # Calculate the number of samples in a 20-second interval
     intervalSamples = int(20 / 0.002)
@@ -46,24 +58,52 @@ def splitFiles(case):
     # Split the data into 20-second intervals
     ppgIntervals = []
     for i in range(0, len(ppgData) - intervalSamples, intervalSamples):
-        if not checkIntervalOverlap([ppgData.iloc[i]['Time'], ppgData.iloc[i+intervalSamples]['Time']], gapsOverall): 
-            ppgIntervals.append(ppgData[i:i+intervalSamples])
-    sbpIntervals = []
-    for i in range(0, len(sbpData) - bpInterval, bpInterval):
-        if not checkIntervalOverlap([sbpData.iloc[i]['Time'], sbpData.iloc[i+bpInterval]['Time']], gapsOverall): 
-            sbpIntervals.append(sbpData[i:i+intervalSamples])
-    dbpIntervals = []
-    for i in range(0, len(dbpData) - bpInterval, bpInterval):
-        if not checkIntervalOverlap([dbpData.iloc[i]['Time'], dbpData.iloc[i+bpInterval]['Time']], gapsOverall): 
-            dbpIntervals.append(dbpData[i:i+intervalSamples])
+        # if not checkIntervalOverlap([ppgData.iloc[i]['Time'], ppgData.iloc[i+intervalSamples]['Time']], gapsOverall): 
+        ppgIntervals.append(ppgData[i:i+intervalSamples])
+    # sbpIntervals = []
+    # for i in range(0, len(sbpData) - bpInterval, bpInterval):
+    #     if not checkIntervalOverlap([sbpData.iloc[i]['Time'], sbpData.iloc[i+bpInterval]['Time']], gapsOverall): 
+    #         sbpIntervals.append(sbpData[i:i+bpInterval])
+    # dbpIntervals = []
+    # for i in range(0, len(dbpData) - bpInterval, bpInterval):
+    #     if not checkIntervalOverlap([dbpData.iloc[i]['Time'], dbpData.iloc[i+bpInterval]['Time']], gapsOverall): 
+    #         dbpIntervals.append(dbpData[i:i+bpInterval])
 
-    # Average out the BP values
+
+
+    # Segmenting the BP intervals according to the ppg split
+    sbpIntervals = []
+    dbpIntervals = []
+    for i in range(len(ppgIntervals)):
+        interval = [ppgIntervals[i].iloc[0]['Time'], ppgIntervals[i].iloc[-1]['Time']]
+        tmp = sbpData.loc[interval[0] <= sbpData['Time']]
+        tmp = tmp.loc[sbpData['Time'] <= interval[1]]
+        #if len(tmp) != 0:
+        sbpIntervals.append(tmp)
+        tmp = dbpData.loc[interval[0] <= dbpData['Time']]
+        tmp = tmp.loc[dbpData['Time'] <= interval[1]]
+        #if len(tmp) != 0:
+        dbpIntervals.append(tmp)
+
+    
+
+    # Average out the BP values. Some intervals may be empty so we ignore them.
     for i in range(len(sbpIntervals)):
-        tmp = sbpIntervals[i]['Solar8000/ART_SBP'].mean()
-        sbpIntervals[i] = pd.DataFrame({'Solar8000/ART_SBP': [tmp]})
+        if len(sbpIntervals[i]) > 0:
+            tmp = sbpIntervals[i]['Solar8000/ART_SBP'].mean()
+            start, finish = sbpIntervals[i].iloc[0]['Time'], sbpIntervals[i].iloc[-1]['Time']
+            sbpIntervals[i] = pd.DataFrame({'start': [start], 'finish': [finish], 'Solar8000/ART_SBP': [tmp]})
+        else:
+            sbpIntervals[i] = pd.DataFrame({'start': [start], 'finish': [finish], 'Solar8000/ART_SBP': [None]})
+            print(sbpIntervals[i])
     for i in range(len(dbpIntervals)):
-        tmp = dbpIntervals[i]['Solar8000/ART_DBP'].mean()
-        dbpIntervals[i] = pd.DataFrame({'Solar8000/ART_DBP': [tmp]})
+        if len(dbpIntervals[i]) > 0:
+            tmp = dbpIntervals[i]['Solar8000/ART_DBP'].mean()
+            start, finish = dbpIntervals[i].iloc[0]['Time'], dbpIntervals[i].iloc[-1]['Time']
+            dbpIntervals[i] = pd.DataFrame({'start': [start], 'finish': [finish], 'Solar8000/ART_DBP': [tmp]})
+        else:
+            dbpIntervals[i] = pd.DataFrame({'start': [start], 'finish': [finish], 'Solar8000/ART_SBP': [None]})
+            print(dbpIntervals[i])
 
     # Make new csv files
     if not os.path.exists('Data/Case' + str(case) + '/Track1_split'): os.mkdir('Data/Case' + str(case) + '/Track1_split')
@@ -76,4 +116,4 @@ def splitFiles(case):
     for i, interval in enumerate(dbpIntervals):
         interval.to_csv('Data/Case' + str(case) + '/Track4_split/interval' + str(i) + '.csv')
 
-splitFiles(2)
+splitFiles(4)
