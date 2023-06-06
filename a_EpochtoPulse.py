@@ -133,6 +133,21 @@ def sort(csv_file):
     with open(csv_file, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(sorted_rows)
+
+    header = ['Time', 'SNUADC/PLETH']
+
+    # Read the existing data from the file
+    with open(csv_file, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+
+# Add the header to the data
+    data.insert(0, header)
+
+# Write the updated data back to the file
+    with open(csv_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(data)
 ##############################################################
 
 
@@ -140,7 +155,7 @@ def sort(csv_file):
 #Main
 
 #define file path
-file_path = 'wave29.csv'
+file_path = 'wave35.csv'
 
 #read csv file
 file = read_csv(file_path, 'Time')
