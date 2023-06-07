@@ -10,11 +10,11 @@ from scipy.signal import argrelextrema
 
 ######################################################################
 
-def read_csv(file_path, column_name):
+def read_csv(file_path, column):
     file = pd.read_csv(file_path)
     return file
 
-######################################################################
+######################################################################x
 
 def signal_plot(file):
     file.plot(title='PPG', x='Time', y='SNUADC/PLETH')
@@ -36,16 +36,14 @@ def get_ppg(file):
 
 def filter_ppg(ppg_raw, time):
 
-    cutoff_freq_1 = 0.1 
     cutoff_freq_2 = 15
     order = 4  
 
     nyquist_freq = 0.5 / 0.002
 
-    normalized_cutoff_freq_1 = cutoff_freq_1 / nyquist_freq
     normalized_cutoff_freq_2 = cutoff_freq_2 / nyquist_freq
 
-    b, a = butter(order, [normalized_cutoff_freq_1 , normalized_cutoff_freq_2], btype='band', analog=False, output='ba')
+    b, a = butter(order, normalized_cutoff_freq_2, btype='low', analog=False, output='ba')
     ppg_filtered = filtfilt(b, a, ppg_raw)
 
 
@@ -64,10 +62,10 @@ def filter_ppg(ppg_raw, time):
 
 ######################################################################
 
-def time_domain_features(time,ppg):
+def time_domain_features(time,ppg,fall_ppg):
     
     rise = max_ppg - prev_min_ppg
-    fall = max_ppg - min_ppg
+    fall = max_ppg - fall_ppg
 
     percantages = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
 
@@ -85,7 +83,7 @@ def time_domain_features(time,ppg):
     # print('Rise Levels:'+ str(rise_levels))
     # print('Fall:'+ str(fall))
     # print('Fall Levels:'+ str(fall_levels))
-                        
+
     rise_level_times = []
     fall_level_times = []
 
@@ -197,6 +195,14 @@ def time_derivative_features(time, ppg):
     ppg_local_min_times = time[argrelextrema(ppg, np.less)[0]]
     ppg_local_min_values = ppg[argrelextrema(ppg, np.less)[0]]
 
+    ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
+    ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
+
+    if(ppg_local_min_values[-1] != ppg[-1]):
+
+        ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
+        ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
+
     ppg_local_max_times = time[argrelextrema(ppg, np.greater)[0]]
     ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
 
@@ -254,7 +260,7 @@ def time_derivative_features(time, ppg):
     plt.tight_layout()
     plt.show()
 
-    time_deriv_features = np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(ppg_local_min_values[0] , ppg_local_min_times[0]) , ppg_local_max_values[0]) , ppg_local_max_times[0]) , deriv_local_min_values[0:4]) , deriv_local_min_times[0:4]) , deriv_local_max_values[0:3]) , deriv_local_max_times[0:3]) , second_deriv_local_min_values[0:4]) , second_deriv_local_min_times[0:4]) ,second_deriv_local_max_values[0:4]) , second_deriv_local_max_times[0:4])
+    time_deriv_features = np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(ppg_local_min_values[0:2] , ppg_local_min_times[0:2]) , ppg_local_max_values[0]) , ppg_local_max_times[0]) , deriv_local_min_values[0:3]) , deriv_local_min_times[0:3]) , deriv_local_max_values[0:3]) , deriv_local_max_times[0:3]) , second_deriv_local_min_values[0:4]) , second_deriv_local_min_times[0:4]) ,second_deriv_local_max_values[0:4]) , second_deriv_local_max_times[0:4])
 
     return time_deriv_features
     
@@ -266,13 +272,16 @@ def frequency_domain_features(ppg):
 
     sampling_freq = 1/0.002
 
-    frequencies = np.fft.fftfreq(len(ppg), 1/sampling_freq)
+    # frequencies = np.fft.fftfreq(len(ppg), 1/sampling_freq)
+    frequencies = np.fft.fftfreq(len(ppg), d=1/sampling_freq)
 
 
     positive_indices = np.where(frequencies >= 0)
     positive_fourier_values = ppg_fourier[positive_indices]
     positive_fourier_frequencies = frequencies[positive_indices]
 
+    print(str(np.abs(positive_fourier_values)))
+    print(str(positive_fourier_frequencies))
 
 
     fourier_local_min_frequencies = positive_fourier_frequencies[argrelextrema(np.abs(positive_fourier_values), np.less)[0]]
@@ -323,6 +332,8 @@ def frequency_domain_features(ppg):
     plt.legend()
     plt.grid(True)
     plt.show()
+
+   
 
 
 
@@ -381,7 +392,7 @@ def frequency_domain_features(ppg):
 
 # ---------------- Main: ------------------------------------------------------------------------------------
 
-file_path = 'D:\\Dokumentumok\\01_PETI\\01_IMPERIAL\\YEAR_3\\TERRA PROJECT\\ppg_example.csv'
+file_path = 'D:\\Dokumentumok\\01_PETI\\01_IMPERIAL\\YEAR_3\\TERRA PROJECT\\ppg_example_2.csv'
 
 file = read_csv(file_path, 'Time')
 
@@ -396,29 +407,54 @@ all_features = []
 
 ppg_raw = ppg.copy()
 ppg = filter_ppg(ppg, time)
+lowest_ppg = min(ppg)
+ppg = ppg - lowest_ppg
 
 
-prev_max_ppg = 54
+
+
 ppg_local_min_times = time[argrelextrema(ppg, np.less)[0]]
 ppg_local_min_values = ppg[argrelextrema(ppg, np.less)[0]]
 ppg_local_max_times = time[argrelextrema(ppg, np.greater)[0]]
 ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
 
+ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
+ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
+
+if(ppg_local_min_values[-1] != ppg[-1]):
+
+    ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
+    ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
+
+prev_min_ppg = ppg[0]
+prev_min_ppg_time = time[0]
 
 max_ppg = max(ppg)
-min_ppg = min(ppg)
-
 max_ppg_index = np.where(ppg == max_ppg)[0]
-min_ppg_index = np.where(ppg == min_ppg)[0]
-
 max_time = time[max_ppg_index][0]
-min_time = time[min_ppg_index][0]
 
-prev_min_ppg = ppg_local_min_values[0]
-prev_min_ppg_time = ppg_local_min_times[0]
 
-# print('Prev_min_ppg_value: ' + str(prev_min_ppg))
-# print('Prev_min_ppg_time: ' + str(prev_min_ppg_time))
+# min_ppg = min(ppg)s
+# min_ppg_index = np.where(ppg == min_ppg)[0]
+# min_time = time[min_ppg_index][0]
+
+min_ppg = ppg_local_min_values[-1]
+min_time = ppg_local_min_times[-1]
+
+
+# if(len(ppg_local_min_values)>2):
+#     fall_ppg = ppg_local_min_values[-1]
+#     fall_ppg_time = ppg_local_min_times[1]
+# else:
+#     fall_ppg = min_ppg
+#     fall_ppg_time = min_time
+
+fall_ppg = ppg[-1]
+
+
+print('Min_ppg_value: ' + str(min_ppg))
+print('Min_ppg_time: ' + str(min_time))
+
 
 
 # prev_max_time = 100.746
@@ -440,11 +476,11 @@ derivative_features = time_derivative_features(time,ppg)
 
 
 
-time_features = time_domain_features(time,ppg)
+time_features = time_domain_features(time,ppg,fall_ppg)
 
 
 
-frequency_features = frequency_domain_features(ppg_raw)
+frequency_features = frequency_domain_features(ppg)
 
 
 features = np.append(np.append(time_features,derivative_features),frequency_features)
