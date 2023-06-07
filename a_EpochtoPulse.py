@@ -49,13 +49,13 @@ def filter_ppg(ppg_raw, time):
 
 ######################################################################
 
-def getmin(ppg,time):
-    mindexes = time[argrelextrema(ppg, np.less,order=190)[0]]
+def getmin(ppg,time,ord):
+    mindexes = time[argrelextrema(ppg, np.less,order= ord)[0]]
 
-    minvalues= ppg[argrelextrema(ppg, np.less, order=190)[0]]
+    minvalues= ppg[argrelextrema(ppg, np.less, order=ord)[0]]
     print(mindexes)
     print(minvalues)
-    plt.plot(time,ppg_fil)
+    plt.plot(time,ppg)
     plt.plot(mindexes, minvalues, 'o')
 
     plt.show()
@@ -149,56 +149,94 @@ def sort(csv_file):
         writer = csv.writer(file)
         writer.writerows(data)
 ##############################################################
+def remove_entries(csv_file, index):
+    with open(csv_file, 'r') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
 
+    if index >= len(rows):
+        print("Index is out of range.")
+        return
+
+    rows = rows[:index + 1]
+
+    with open(csv_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
+###########################################################################################
 
 
 #Main
+def main():
+    #define file path
+    file_path = 'wave144.csv'
 
-#define file path
-file_path = 'wave35.csv'
+    #read csv file
+    file = read_csv(file_path, 'Time')
 
-#read csv file
-file = read_csv(file_path, 'Time')
+    time = get_time(file)
+    ppg = get_ppg(file)
 
-time = get_time(file)
-ppg = get_ppg(file)
+    #filter PPG signal
+    ppg_fil = filter_ppg(ppg, time)
 
-#filter PPG signal
-ppg_fil = filter_ppg(ppg, time)
+    #Find minimums
+    mindexes = getmin(ppg_fil,time, 190)
 
-#Find minimums
-mindexes = getmin(ppg_fil,time)
+    #Change indexes based on minimums
+    countset(file_path , mindexes)
 
-#Change indexes based on minimums
-countset(file_path , mindexes)
+    #get average
+    average(file_path, 'a_output.csv')
 
-#get average
-average(file_path, 'a_output.csv')
-
-#sort columns
-sort('a_output.csv')
-
-
-#plot output
-data = pd.read_csv('a_output.csv')
-
-# Extract the values from column 1 (x-axis) and column 3 (y-axis)
-x = data.iloc[:, 0]
-y = data.iloc[:, 1]
-
-# Plot the data
-plt.plot(x, y)
-
-# Set the labels for x-axis and y-axis
-plt.xlabel('Index')
-plt.ylabel('Signal Value')
-
-plt.title('Averaged Wave')
+    #sort columns
+    sort('a_output.csv')
 
 
-plt.show()
 
 
+    #cut the wave at first minimum to get rid of detection errors
+    #read output file
+    file_path2 = 'a_output.csv'
+
+    #read csv file
+    file2 = read_csv(file_path2, 'Time')
+
+    time2 = get_time(file2)
+    ppg2 = get_ppg(file2)
+
+
+    cutoff = getmin(ppg2,time2, 250)
+    if len(cutoff) >1 :
+        remove_entries(file_path2, cutoff[1])
+    elif cutoff[0] >200:
+        remove_entries(file_path2, cutoff[0])
+
+    print('cutoff:')
+    print(cutoff)
+    print('end')
+
+
+
+    # Plot the data
+    #plot output
+    data = pd.read_csv('a_output.csv')
+
+
+    x = data.iloc[:, 0]
+    y = data.iloc[:, 1]
+    plt.plot(x, y)
+
+    # Set the labels for x-axis and y-axis
+    plt.xlabel('Index')
+    plt.ylabel('Signal Value')
+
+    plt.title('finaloutput')
+
+
+    plt.show()
+
+###################################################################################
 
 
 
