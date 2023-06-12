@@ -115,5 +115,3 @@ def splitFiles(case):
         interval.to_csv('Data/Case' + str(case) + '/Track2_split/interval' + str(i) + '.csv')
     for i, interval in enumerate(dbpIntervals):
         interval.to_csv('Data/Case' + str(case) + '/Track4_split/interval' + str(i) + '.csv')
-
-splitFiles(4)

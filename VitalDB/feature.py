@@ -50,7 +50,7 @@ def filter_ppg(ppg_raw, time):
 
     # Plot the original and filtered signals
     plt.figure(figsize=(6, 6))
-    plt.plot(time, ppg, label='Original PPG signal')
+    plt.plot(time, ppg_raw, label='Original PPG signal')
     plt.plot(time, ppg_filtered, label='Filtered PPG signal')
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
@@ -62,7 +62,7 @@ def filter_ppg(ppg_raw, time):
 
 ######################################################################
 
-def time_domain_features(time,ppg,fall_ppg):
+def time_domain_features(time,ppg,fall_ppg, max_ppg, prev_min_ppg, max_time, prev_min_ppg_time):
     
     rise = max_ppg - prev_min_ppg
     fall = max_ppg - fall_ppg
@@ -186,7 +186,7 @@ def time_domain_features(time,ppg,fall_ppg):
 
 ######################################################################
 
-def time_derivative_features(time, ppg):
+def time_derivative_features(time, ppg, max_ppg, prev_min_ppg):
     
     ppg_first_derivative = np.gradient(ppg)
     ppg_second_derivative = np.gradient(ppg_first_derivative)
@@ -280,8 +280,8 @@ def frequency_domain_features(ppg):
     positive_fourier_values = ppg_fourier[positive_indices]
     positive_fourier_frequencies = frequencies[positive_indices]
 
-    print(str(np.abs(positive_fourier_values)))
-    print(str(positive_fourier_frequencies))
+    # print(str(np.abs(positive_fourier_values)))
+    # print(str(positive_fourier_frequencies))
 
 
     fourier_local_min_frequencies = positive_fourier_frequencies[argrelextrema(np.abs(positive_fourier_values), np.less)[0]]
@@ -391,102 +391,105 @@ def frequency_domain_features(ppg):
 ######################################################################
 
 # ---------------- Main: ------------------------------------------------------------------------------------
+def features(fileName):
 
-file_path = 'D:\\Dokumentumok\\01_PETI\\01_IMPERIAL\\YEAR_3\\TERRA PROJECT\\ppg_example_2.csv'
+    file_path = fileName
 
-file = read_csv(file_path, 'Time')
+    file = read_csv(file_path, 'Time')
 
-time = get_time(file)
-ppg = get_ppg(file)
+    time = get_time(file)
+    ppg = get_ppg(file)
 
-#print('Length of ppg:'+ str(len(ppg)))
-
-
-all_features = []
+    #print('Length of ppg:'+ str(len(ppg)))
 
 
-ppg_raw = ppg.copy()
-ppg = filter_ppg(ppg, time)
-lowest_ppg = min(ppg)
-ppg = ppg - lowest_ppg
+    all_features = []
 
 
-
-
-ppg_local_min_times = time[argrelextrema(ppg, np.less)[0]]
-ppg_local_min_values = ppg[argrelextrema(ppg, np.less)[0]]
-ppg_local_max_times = time[argrelextrema(ppg, np.greater)[0]]
-ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
-
-ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
-ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
-
-if(ppg_local_min_values[-1] != ppg[-1]):
-
-    ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
-    ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
-
-prev_min_ppg = ppg[0]
-prev_min_ppg_time = time[0]
-
-max_ppg = max(ppg)
-max_ppg_index = np.where(ppg == max_ppg)[0]
-max_time = time[max_ppg_index][0]
-
-
-# min_ppg = min(ppg)s
-# min_ppg_index = np.where(ppg == min_ppg)[0]
-# min_time = time[min_ppg_index][0]
-
-min_ppg = ppg_local_min_values[-1]
-min_time = ppg_local_min_times[-1]
-
-
-# if(len(ppg_local_min_values)>2):
-#     fall_ppg = ppg_local_min_values[-1]
-#     fall_ppg_time = ppg_local_min_times[1]
-# else:
-#     fall_ppg = min_ppg
-#     fall_ppg_time = min_time
-
-fall_ppg = ppg[-1]
-
-
-print('Min_ppg_value: ' + str(min_ppg))
-print('Min_ppg_time: ' + str(min_time))
+    ppg_raw = ppg.copy()
+    ppg = filter_ppg(ppg, time)
+    lowest_ppg = min(ppg)
+    ppg = ppg - lowest_ppg
 
 
 
-# prev_max_time = 100.746
-# prev_min_time = 101.492
 
-#max_time_difference = max_time - prev_max_time         ####probs not needed here
-min_time_difference = min_time - prev_min_ppg_time
+    ppg_local_min_times = time[argrelextrema(ppg, np.less)[0]]
+    ppg_local_min_values = ppg[argrelextrema(ppg, np.less)[0]]
+    ppg_local_max_times = time[argrelextrema(ppg, np.greater)[0]]
+    ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
 
+    ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
+    ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
 
-pulse_period = 72
-#print('Pulse Period:'+ str(pulse_period))
+    if(ppg_local_min_values[-1] != ppg[-1]):
 
-heart_rate = 60/pulse_period
-#print('Heart Rate:'+ str(heart_rate))
+        ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
+        ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
 
+    prev_min_ppg = ppg[0]
+    prev_min_ppg_time = time[0]
 
-
-derivative_features = time_derivative_features(time,ppg)
-
-
-
-time_features = time_domain_features(time,ppg,fall_ppg)
-
-
-
-frequency_features = frequency_domain_features(ppg)
+    max_ppg = max(ppg)
+    max_ppg_index = np.where(ppg == max_ppg)[0]
+    max_time = time[max_ppg_index][0]
 
 
-features = np.append(np.append(time_features,derivative_features),frequency_features)
+    # min_ppg = min(ppg)s
+    # min_ppg_index = np.where(ppg == min_ppg)[0]
+    # min_time = time[min_ppg_index][0]
+
+    min_ppg = ppg_local_min_values[-1]
+    min_time = ppg_local_min_times[-1]
 
 
-print('\nThere are ' + str(len(features)) + ' features extracted.\n')
+    # if(len(ppg_local_min_values)>2):
+    #     fall_ppg = ppg_local_min_values[-1]
+    #     fall_ppg_time = ppg_local_min_times[1]
+    # else:
+    #     fall_ppg = min_ppg
+    #     fall_ppg_time = min_time
 
-for i in range(len(features)):
-    print('Feature number ' + str(i+1) + ' is : ' + str(features[i]))
+    fall_ppg = ppg[-1]
+
+
+    # print('Min_ppg_value: ' + str(min_ppg))
+    # print('Min_ppg_time: ' + str(min_time))
+
+
+
+    # prev_max_time = 100.746
+    # prev_min_time = 101.492
+
+    #max_time_difference = max_time - prev_max_time         ####probs not needed here
+    min_time_difference = min_time - prev_min_ppg_time
+
+
+    pulse_period = 72
+    #print('Pulse Period:'+ str(pulse_period))
+
+    heart_rate = 60/pulse_period
+    #print('Heart Rate:'+ str(heart_rate))
+
+
+
+    derivative_features = time_derivative_features(time,ppg,max_ppg,prev_min_ppg)
+
+
+
+    time_features = time_domain_features(time,ppg,fall_ppg,max_ppg,prev_min_ppg,max_time,prev_min_ppg_time)
+
+
+
+    frequency_features = frequency_domain_features(ppg)
+
+
+    features = np.append(np.append(time_features,derivative_features),frequency_features)
+
+    return features
+
+
+# print('\nThere are ' + str(len(features)) + ' features extracted.\n')
+
+# for i in range(len(features)):
+#     print('Feature number ' + str(i+1) + ' is : ' + str(features[i]))

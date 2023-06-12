@@ -53,8 +53,8 @@ def getmin(ppg,time,ord):
     mindexes = time[argrelextrema(ppg, np.less,order= ord)[0]]
 
     minvalues= ppg[argrelextrema(ppg, np.less, order=ord)[0]]
-    print(mindexes)
-    print(minvalues)
+    # print(mindexes)
+    # print(minvalues)
     plt.plot(time,ppg)
     plt.plot(mindexes, minvalues, 'o')
 
@@ -155,7 +155,7 @@ def remove_entries(csv_file, index):
         rows = list(reader)
 
     if index >= len(rows):
-        print("Index is out of range.")
+        # print("Index is out of range.")
         return
 
     rows = rows[:index + 1]
@@ -167,9 +167,9 @@ def remove_entries(csv_file, index):
 
 
 #Main
-def main():
+def epochToPulse(fileName):
     #define file path
-    file_path = 'wave144.csv'
+    file_path = fileName
 
     #read csv file
     file = read_csv(file_path, 'Time')
@@ -212,29 +212,29 @@ def main():
     elif cutoff[0] >200:
         remove_entries(file_path2, cutoff[0])
 
-    print('cutoff:')
-    print(cutoff)
-    print('end')
+    # print('cutoff:')
+    # print(cutoff)
+    # print('end')
 
 
 
-    # Plot the data
-    #plot output
-    data = pd.read_csv('a_output.csv')
+    # # Plot the data
+    # #plot output
+    # data = pd.read_csv('a_output.csv')
 
 
-    x = data.iloc[:, 0]
-    y = data.iloc[:, 1]
-    plt.plot(x, y)
+    # x = data.iloc[:, 0]
+    # y = data.iloc[:, 1]
+    # plt.plot(x, y)
 
-    # Set the labels for x-axis and y-axis
-    plt.xlabel('Index')
-    plt.ylabel('Signal Value')
+    # # Set the labels for x-axis and y-axis
+    # plt.xlabel('Index')
+    # plt.ylabel('Signal Value')
 
-    plt.title('finaloutput')
+    # plt.title('finaloutput')
 
 
-    plt.show()
+    # plt.show()
 
 ###################################################################################
 

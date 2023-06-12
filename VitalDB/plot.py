@@ -36,3 +36,11 @@ def pltData(case):
     # plt.plot(500, ppgFFT, title='FFT')
 
     # plt.show()
+
+def pltEpoch(path):
+    epoch = pd.read_csv(path)
+    epoch.plot(title='PPG', x='Time', y='SNUADC/PLETH')
+    plt.show()
+
+# pltEpoch('Data/Case1/Track1_split/interval0.csv')
+# pltEpoch('Data/Case1/Track1_split/interval1.csv')
