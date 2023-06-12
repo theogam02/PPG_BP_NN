@@ -198,6 +198,11 @@ def time_derivative_features(time, ppg):
     ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
     ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
 
+    if(ppg_local_min_values[-1] != ppg[-1]):
+
+        ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
+        ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
+
     ppg_local_max_times = time[argrelextrema(ppg, np.greater)[0]]
     ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
 
@@ -279,9 +284,6 @@ def frequency_domain_features(ppg):
     print(str(positive_fourier_frequencies))
 
 
-    psd = np.abs(positive_fourier_values)**2
-
-
     fourier_local_min_frequencies = positive_fourier_frequencies[argrelextrema(np.abs(positive_fourier_values), np.less)[0]]
     fourier_local_min_values = np.abs(positive_fourier_values)[argrelextrema(np.abs(positive_fourier_values), np.less)[0]]
 
@@ -331,16 +333,7 @@ def frequency_domain_features(ppg):
     plt.grid(True)
     plt.show()
 
-    plt.figure(figsize=(8, 6))
-    plt.plot(positive_fourier_frequencies, psd)
-    plt.xlabel('Frequency')
-    plt.ylabel('Power')
-    plt.title('Power Spectral Desity of PPG signal')
-    plt.xlim(0,20)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
+   
 
 
 
@@ -428,6 +421,11 @@ ppg_local_max_values = ppg[argrelextrema(ppg, np.greater)[0]]
 ppg_local_min_values = np.insert(ppg_local_min_values, 0, ppg[0])
 ppg_local_min_times = np.insert(ppg_local_min_times, 0, time[0])
 
+if(ppg_local_min_values[-1] != ppg[-1]):
+
+    ppg_local_min_values = np.insert(ppg_local_min_values, -1, ppg[-1])
+    ppg_local_min_times = np.insert(ppg_local_min_times, -1, time[-1])
+
 prev_min_ppg = ppg[0]
 prev_min_ppg_time = time[0]
 
@@ -436,7 +434,7 @@ max_ppg_index = np.where(ppg == max_ppg)[0]
 max_time = time[max_ppg_index][0]
 
 
-# min_ppg = min(ppg)
+# min_ppg = min(ppg)s
 # min_ppg_index = np.where(ppg == min_ppg)[0]
 # min_time = time[min_ppg_index][0]
 
@@ -444,12 +442,14 @@ min_ppg = ppg_local_min_values[-1]
 min_time = ppg_local_min_times[-1]
 
 
-if(len(ppg_local_min_values)>2):
-    fall_ppg = ppg_local_min_values[1]
-    fall_ppg_time = ppg_local_min_times[1]
-else:
-    fall_ppg = min_ppg
-    fall_ppg_time = min_time
+# if(len(ppg_local_min_values)>2):
+#     fall_ppg = ppg_local_min_values[-1]
+#     fall_ppg_time = ppg_local_min_times[1]
+# else:
+#     fall_ppg = min_ppg
+#     fall_ppg_time = min_time
+
+fall_ppg = ppg[-1]
 
 
 print('Min_ppg_value: ' + str(min_ppg))
