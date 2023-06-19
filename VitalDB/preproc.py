@@ -11,19 +11,19 @@ def cleanData(case):
     tmp1 = pd.DataFrame(tmp1['SNUADC/PLETH'])
     tmp1 = pd.concat([tmp2, tmp1], axis=1, join="inner")
     tmp1 = tmp1.dropna()
-    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track1.csv')
+    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track1.csv', index=False)
 
     # Cleaning the Diastolic BP Data
     tmp1 = pd.read_csv('Data/' + 'Case' + str(case) + '/track2.csv')
     tmp1 = tmp1.loc[tmp1['Solar8000/ART_DBP'] > 0]
-    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track2.csv')
+    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track2.csv', index=False)
 
     # Cleaning the Mean BP Data
     tmp1 = pd.read_csv('Data/' + 'Case' + str(case) + '/track3.csv')
     tmp1 = tmp1.loc[tmp1['Solar8000/ART_MBP'] > 0]
-    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track3.csv')
+    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track3.csv', index=False)
 
     #Cleaning the Systolic BP Data
     tmp1 = pd.read_csv('Data/' + 'Case' + str(case) + '/track4.csv')
     tmp1 = tmp1.loc[tmp1['Solar8000/ART_SBP'] > 0]
-    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track4.csv')
+    tmp1.to_csv('Data/' + 'Case' + str(case) + '/track4.csv', index=False)

@@ -4,7 +4,7 @@ import json
 import csv
 import pandas as pd
 
-#r = requests.get('http://api.vitaldb.net/22f7c87e40887e437db5e0f6bde5e3df254d79f5')
+# r = requests.get('http://api.vitaldb.net/22f7c87e40887e437db5e0f6bde5e3df254d79f5')
 # trks = requests.get('http://api.vitaldb.net/trks')
 
 # with open('Data/allMeasurements.csv', 'w') as out:
@@ -26,12 +26,19 @@ import pandas as pd
 
 # trks = pd.concat(caseList)
 # trks.to_csv('Data/caseList.csv')
+# trks = pd.read_csv('Data/caseList.csv')
 
 def getCase(case):
+    # read all the cases that have measurements we need
     trks = pd.read_csv('Data/caseList.csv')
+    # cases = trks['caseid'].unique()
+
+    # get the 4 measurement tracks from the case we want
     for i in range(4):
-        tmp = requests.get('http://api.vitaldb.net/' + trks.iloc[4*(case-1)+i]['tid'])
+        tmp = requests.get('http://api.vitaldb.net/' + trks.iloc[4*case+i]['tid'])
         if not os.path.exists('Data/Case' + str(case)):
             os.mkdir('Data/Case' + str(case))
         with open('Data/Case' + str(case) + '/track' + str(i+1) + '.csv', 'w') as out:
             out.write(tmp.text)
+
+getCase(1)

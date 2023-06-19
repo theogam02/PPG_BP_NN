@@ -9,6 +9,9 @@ from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
 from scipy.signal import argrelmin
 from collections import defaultdict
+from scipy.fft import fft, fftfreq
+import shutil
+import os
 ######################################################################
 
 def read_csv(file_path, column_name):
@@ -55,12 +58,37 @@ def getmin(ppg,time,ord):
     minvalues= ppg[argrelextrema(ppg, np.less, order=ord)[0]]
     # print(mindexes)
     # print(minvalues)
-    plt.plot(time,ppg)
-    plt.plot(mindexes, minvalues, 'o')
+    # plt.plot(time,ppg)
+    # plt.plot(mindexes, minvalues, 'o')
 
-    plt.show()
+    # plt.show()
     return mindexes
+#######################################################################
+def copy_file(filename):
+    # Generate the raw filename
+    new_filename = f"{filename.split('.csv')[0]}-raw.csv"
 
+    try:
+        # Copy the file
+        shutil.copyfile(filename, new_filename)
+       
+    except FileNotFoundError:
+        print(f"File not found: {filename}")
+    except:
+        print("An error occurred while creating the copy.")
+
+########################################################################
+def getfreq(ppg):
+    fft_result = fft(ppg)
+
+
+    sample_rate = 500  # Assuming the signal is sampled at a rate of 1 Hz
+    frequencies = fftfreq(len(ppg), d=1/sample_rate)
+
+
+    dominant_frequency = frequencies[np.argmax(np.abs(fft_result))]
+
+    return dominant_frequency
 ######################################################################
 def countset(csv_file, indexes_of_interest):
     updated_rows = []  # To store the updated rows
@@ -155,7 +183,7 @@ def remove_entries(csv_file, index):
         rows = list(reader)
 
     if index >= len(rows):
-        # print("Index is out of range.")
+        print("Index is out of range.")
         return
 
     rows = rows[:index + 1]
@@ -164,6 +192,19 @@ def remove_entries(csv_file, index):
         writer = csv.writer(file)
         writer.writerows(rows)
 ###########################################################################################
+def normalize(file):
+     # Read the CSV file 
+    df = pd.read_csv(file)
+
+    # Find the max value
+    max_grade = df['SNUADC/PLETH'].max()
+
+    # Normalize values
+    df['SNUADC/PLETH'] = df['SNUADC/PLETH'] / max_grade
+
+    # Write new values to CSV
+    df.to_csv(file, index=False)
+###########################################################################################
 
 
 #Main
@@ -171,76 +212,164 @@ def epochToPulse(fileName):
     #define file path
     file_path = fileName
 
+    #copy file
+    copy_file(file_path)
+
+    #make changes happen to the copy
+    raw_filename = f"{file_path.split('.csv')[0]}-raw.csv"
+    # print(raw_filename)
+    file_path = raw_filename
+
+
     #read csv file
     file = read_csv(file_path, 'Time')
 
     time = get_time(file)
     ppg = get_ppg(file)
 
+    
+
     #filter PPG signal
     ppg_fil = filter_ppg(ppg, time)
 
-    #Find minimums
-    mindexes = getmin(ppg_fil,time, 190)
+    #Get Dominant frequency
+    domfreq = getfreq(ppg_fil)
+    domperiod = 1/domfreq
+    # print(domfreq)
 
-    #Change indexes based on minimums
-    countset(file_path , mindexes)
+    #calculate heartbeat:
+    bpm = 60/domperiod
+    # print('bpm: ',bpm)
+    if 30<bpm<300 :
+        #Find minimums
+        mindexes = getmin(ppg_fil,time, 190)
 
-    #get average
-    average(file_path, 'a_output.csv')
+        #Change indexes based on minimums
+        countset(file_path , mindexes)
 
-    #sort columns
-    sort('a_output.csv')
+        #get average
+        average(file_path, 'a_output.csv')
 
-
-
-
-    #cut the wave at first minimum to get rid of detection errors
-    #read output file
-    file_path2 = 'a_output.csv'
-
-    #read csv file
-    file2 = read_csv(file_path2, 'Time')
-
-    time2 = get_time(file2)
-    ppg2 = get_ppg(file2)
-
-
-    cutoff = getmin(ppg2,time2, 250)
-    if len(cutoff) >1 :
-        remove_entries(file_path2, cutoff[1])
-    elif cutoff[0] >200:
-        remove_entries(file_path2, cutoff[0])
-
-    # print('cutoff:')
-    # print(cutoff)
-    # print('end')
+        #sort columns
+        sort('a_output.csv')
 
 
 
-    # # Plot the data
-    # #plot output
-    # data = pd.read_csv('a_output.csv')
+
+        #cut the wave at first minimum to get rid of detection errors
+        #read output file
+        file_path2 = 'a_output.csv'
+
+        #read csv file
+        file2 = read_csv(file_path2, 'Time')
+
+        time2 = get_time(file2)
+        ppg2 = get_ppg(file2)
 
 
-    # x = data.iloc[:, 0]
-    # y = data.iloc[:, 1]
-    # plt.plot(x, y)
 
-    # # Set the labels for x-axis and y-axis
-    # plt.xlabel('Index')
-    # plt.ylabel('Signal Value')
-
-    # plt.title('finaloutput')
+        #plot before cutoffs
+        data = pd.read_csv('a_output.csv')
 
 
-    # plt.show()
+        # x = data.iloc[:, 0]
+        # y = data.iloc[:, 1]
+        # plt.plot(x, y)
+
+        # Set the labels for x-axis and y-axis
+        # plt.xlabel('Index')
+        # plt.ylabel('Signal Value')
+
+        # plt.title('beforeoutput')
+
+
+        # plt.show()
+
+        # cuts off the wave after 1 period
+        remove_entries(file_path2,int(domperiod/0.002))
+
+        #Attempt to cut off at the last minimum
+        start_index = int((domperiod/0.002) /2)
+        end_index = int(domperiod/0.002) 
+
+        # Find the minimum value and its index in the segment
+        #Segment is the second half of the wave
+        segment = ppg2[start_index:end_index+1]
+        min_value = np.min(segment)
+        min_index = np.argmin(segment)
+        real_index = min_index + start_index 
+
+        remove_entries(file_path2,real_index)
+
+
+        
+        # cutoff = getmin(ppg2,time2, 10)
+        # if len(cutoff) !=0:
+        #     if len(cutoff) >1 :
+        #         remove_entries(file_path2, cutoff[1])
+        #     elif cutoff[0] >(domperiod/0.002):
+        #         remove_entries(file_path2, cutoff[0])
+
+        # print('cutoff:')
+        # print(cutoff)
+        # print('end')
+
+
+
+        # Plot the data
+        #plot output
+        data = pd.read_csv('a_output.csv')
+
+
+        # x = data.iloc[:, 0]
+        # y = data.iloc[:, 1]
+        # plt.plot(x, y)
+
+        # # Set the labels for x-axis and y-axis
+        # plt.xlabel('Index')
+        # plt.ylabel('Signal Value')
+
+        # plt.title('finaloutput')
+
+
+        # plt.show()
+
+        normalize('a_output.csv')
+
+        # data = pd.read_csv('a_output.csv')
+
+
+        # x = data.iloc[:, 0]
+        # y = data.iloc[:, 1]
+        # plt.plot(x, y)
+
+        # # Set the labels for x-axis and y-axis
+        # plt.xlabel('Index')
+        # plt.ylabel('Signal Value')
+
+        # plt.title('finaloutputnormal')
+
+
+        # plt.show()
+        # print(file_path)
+
+        os.remove(file_path)
+
+    else:
+        print('BPM out of range')
+        
+        x = time
+        y = ppg
+        plt.plot(x, y)
+
+        # Set the labels for x-axis and y-axis
+        plt.xlabel('Index')
+        plt.ylabel('Signal Value')
+
+        plt.title('Badwave')
+
+
+        plt.show()
+        
 
 ###################################################################################
-
-
-
-
-
-
-
