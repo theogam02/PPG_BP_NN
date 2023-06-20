@@ -267,9 +267,23 @@ def time_derivative_features(time, ppg):
     # plt.tight_layout()
     # plt.show()
 
-    time_deriv_features = np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(ppg_local_min_values[0:2] , ppg_local_min_times[0:2]) , ppg_local_max_values[0]) , ppg_local_max_times[0]) , deriv_local_min_values[0:1]) , deriv_local_min_times[0:1]) , deriv_local_max_values[0:1]) , deriv_local_max_times[0:1]) , second_deriv_local_min_values[0:2]) , second_deriv_local_min_times[0:2]) ,second_deriv_local_max_values[0:2]) , second_deriv_local_max_times[0:2])
-
-    return time_deriv_features
+    # print('ppg_local_min_values[0:2]: ', ppg_local_min_values[0:2])
+    # print('ppg_local_min_times[0:2]: ', ppg_local_min_times[0:2])
+    # print('ppg_local_max_values[0]: ' ,ppg_local_max_values[0])
+    # print('ppg_local_max_times[0]: ', ppg_local_max_times[0])
+    # print('deriv_local_min_values[0:1]: ', deriv_local_min_values[0:1])
+    # print('deriv_local_min_times[0:1]: ', deriv_local_min_times[0:1])
+    # print('deriv_local_max_values[0:1]: ', deriv_local_max_values[0:1])
+    # print('deriv_local_max_times[0:1]: ', deriv_local_max_times[0:1])
+    # print('second_deriv_local_min_values[0:2]: ', second_deriv_local_min_values[0:2])
+    # print('second_deriv_local_min_times[0:2]: ', second_deriv_local_min_times[0:2])
+    # print('second_deriv_local_max_values[0:2]: ', second_deriv_local_max_values[0:2])
+    # print('second_deriv_local_max_times[0:2]: ', second_deriv_local_max_times[0:2])
+    if len(ppg_local_max_values) > 0:
+        time_deriv_features = np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(np.append(ppg_local_min_values[0:2] , ppg_local_min_times[0:2]) , ppg_local_max_values[0]) , ppg_local_max_times[0]) , deriv_local_min_values[0:1]) , deriv_local_min_times[0:1]) , deriv_local_max_values[0:1]) , deriv_local_max_times[0:1]) , second_deriv_local_min_values[0:2]) , second_deriv_local_min_times[0:2]) ,second_deriv_local_max_values[0:2]) , second_deriv_local_max_times[0:2])
+        return time_deriv_features
+    else:
+        return []
     
 ######################################################################
 
@@ -482,21 +496,23 @@ def features(fileName):
 
     derivative_features = time_derivative_features(time,ppg)
 
+    if derivative_features != []:
+
+        time_features = time_domain_features(time,ppg,fall_ppg, max_ppg, prev_min_ppg, max_time, prev_min_ppg_time)
 
 
-    time_features = time_domain_features(time,ppg,fall_ppg, max_ppg, prev_min_ppg, max_time, prev_min_ppg_time)
+
+        frequency_features = frequency_domain_features(ppg)
 
 
+        features = np.append(np.append(time_features,derivative_features),frequency_features)
+        # print('\nThere are ' + str(len(features)) + ' features extracted.\n')
 
-    frequency_features = frequency_domain_features(ppg)
-
-
-    features = np.append(np.append(time_features,derivative_features),frequency_features)
-    # print('\nThere are ' + str(len(features)) + ' features extracted.\n')
-
-    # for i in range(len(features)):
-    #     print('Feature number ' + str(i+1) + ' is : ' + str(features[i]))
-    return features
+        # for i in range(len(features)):
+        #     print('Feature number ' + str(i+1) + ' is : ' + str(features[i]))
+        return features
+    else:
+        return []
 
 
-    
+# features('a_output.csv')

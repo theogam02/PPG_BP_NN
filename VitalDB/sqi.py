@@ -5,6 +5,8 @@ import pandas as pd
 
 
 def sqitest(file_path):
+    skewsqi = 0
+    k_sqi =0
     # Read the CSV file into a pandas DataFrame, skipping the header row
     df = pd.read_csv(file_path, skiprows=1, header=None)
 
@@ -88,18 +90,24 @@ def sqitest(file_path):
 
     #Test if the file passes the thresholds:
     t = 0
-    if skewsqi < 0.3501 :
+    if skewsqi < 0.3501 or skewsqi >1.5:
         t=1
         # print('skew test failed')
-    if k_sqi < 1.5 :
+    if k_sqi < 1.5 or k_sqi >3.5:
         t=1
         # print('k test failed')
-    if e_sqi <80 :
+    if mean_value >1 :
         t=1
-        # print('e test failed')
+    if p_sqi < 20 or p_sqi >200 :
+        t=1
+    # if e_sqi <80 :
+    #     t=1
+    #     # print('e test failed')
 
     # if t == 1:
     #     print('sqi test failed')
     # else :
     #     print('passed')
     return t
+
+# sqitest('a_output.csv')

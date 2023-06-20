@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from scipy.fft import fft, ifft
 
+import a_EpochtoPulse
+
 def pltData(case):
     # PPG
     ppg = pd.read_csv('Data/' + 'Case' + str(case) + '/track1.csv')
@@ -43,5 +45,6 @@ def pltEpoch(path):
     plt.show()
 
 # pltEpoch('Data/Case1/Track1_split/interval0.csv')
-# pltEpoch('Data/Case1/Track1_split/interval1.csv')
-# pltEpoch('Data/Case5/Track1_split/interval117.csv')
+# pltEpoch('Data/Case55/Track1_split/interval187.csv')
+# a_EpochtoPulse.epochToPulse('Data/Case55/Track1_split/interval187.csv')
+# pltEpoch('a_output.csv')

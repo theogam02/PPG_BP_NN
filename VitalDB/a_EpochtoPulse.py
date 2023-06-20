@@ -318,7 +318,7 @@ def epochToPulse(fileName):
 
         # Plot the data
         #plot output
-        data = pd.read_csv('a_output.csv')
+        #data = pd.read_csv('a_output.csv')
 
 
         # x = data.iloc[:, 0]
@@ -357,19 +357,20 @@ def epochToPulse(fileName):
 
     else:
         print('BPM out of range')
-        
+        os.remove(file_path)
         x = time
         y = ppg
-        plt.plot(x, y)
+        # plt.plot(x, y)
 
-        # Set the labels for x-axis and y-axis
-        plt.xlabel('Index')
-        plt.ylabel('Signal Value')
+        # # Set the labels for x-axis and y-axis
+        # plt.xlabel('Index')
+        # plt.ylabel('Signal Value')
 
-        plt.title('Badwave')
+        # plt.title('Badwave')
 
 
-        plt.show()
+        # plt.show()
         
 
 ###################################################################################
+# epochToPulse('Data/Case20/Track1_split/interval413.csv')

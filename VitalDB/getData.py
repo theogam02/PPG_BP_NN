@@ -41,4 +41,4 @@ def getCase(case):
         with open('Data/Case' + str(case) + '/track' + str(i+1) + '.csv', 'w') as out:
             out.write(tmp.text)
 
-getCase(1)
+# getCase(1)
