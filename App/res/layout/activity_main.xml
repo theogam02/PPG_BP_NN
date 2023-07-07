@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:id="@+id/current_reading_HEART_RATE"
+        android:layout_width="376dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="170dp"
+        android:paddingTop="1dp"
+        android:paddingLeft="5dp"
+        android:background="@drawable/round_button" >
+
+        <TextView
+            android:id="@+id/current_reading_HEART_RATE_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Reading For Heart Rate"
+            android:textAlignment="viewStart"
+            android:paddingStart="1dp"
+            android:paddingTop="1dp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"/> <!-- Set text color to green (#00FF00) -->
+
+        <TextView
+            android:id="@+id/current_reading_HEART_RATE_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="1dp"
+            android:paddingTop="25dp"
+            android:text="Current Reading"
+            android:textColor="#000000" /> <!-- Set text color to green (#00FF00) -->
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/current_reading_box"
+        android:layout_width="376dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="235dp"
+        android:background="@drawable/round_button1" >
+
+        <TextView
+            android:id="@+id/current_reading_sys"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Reading For SYS"
+            android:textAlignment="viewStart"
+            android:gravity="top|start"
+            android:paddingTop="1dp"
+            android:paddingLeft="5dp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"/>
+
+        <TextView
+            android:id="@+id/CurrentReadingValue_sys"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="1dp"
+            android:paddingTop="25dp"
+            android:text="Current Reading" />
+
+        <TextView
+            android:id="@+id/current_reading_dia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Reading For DIA"
+            android:layout_gravity="top|right"
+            android:paddingTop="1dp"
+            android:paddingRight="10dp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"/>
+
+        <TextView
+            android:id="@+id/CurrentReadingValue_DIA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="1dp"
+            android:paddingTop="25dp"
+            android:layout_gravity="top|right"
+            android:paddingRight="10dp"
+            android:text="Current Reading" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/graphContainer"
+        android:layout_width="376dp"
+        android:layout_height="213dp"
+        android:layout_marginTop="130dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/round_button">
+        <TextView
+            android:id="@+id/PPG_DATA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PPG"
+            android:textAlignment="viewStart"
+            android:gravity="top|start"
+            android:background="#FF9E89"
+            android:paddingTop="1dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"/>
+
+        <TextView
+            android:id="@+id/CurrentReadingValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#FF9E89"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="30dp"
+            android:text=" ppg "
+            android:paddingLeft="5dp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"/>
+
+        <com.jjoe64.graphview.GraphView
+            android:id="@+id/graphView"
+            android:layout_width="351dp"
+            android:layout_height="161dp"
+            android:layout_gravity="bottom|right" />
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/semicircleView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="-150dp"
+        android:background="@drawable/round_button2" />
+
+    <Button
+        android:id="@+id/scanButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="#000000"/>
+
+    <ListView
+        android:id="@+id/deviceListView"
+        android:background="#000000"
+        android:layout_width="200dp"
+        android:layout_height="160dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/disconnectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="-1dp"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginBottom="0dp"
+        android:background="#000000"
+        android:text="Disconnect" />
+
+    <TextView
+        android:id="@+id/deviceInfoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text=" no device connected "/>
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/deviceInfoTextView"
+        android:layout_centerHorizontal="true"
+        android:text=""/>
+
+    <FrameLayout
+        android:id="@+id/Todays_date_bar"
+        android:layout_width="500dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/round_button4">
+
+        <TextView
+            android:id="@+id/Todays_date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Thursday 29th June 2023"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif" />
+
+    </FrameLayout>
+
+</RelativeLayout>

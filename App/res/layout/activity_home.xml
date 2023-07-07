@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF9E89"
+    tools:context=".HomePageActivity">
+
+    <Button
+        android:id="@+id/buttonBackToBluetooth"
+        android:layout_width="376dp"
+        android:layout_height="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:text="Connect to Heart monitor"
+        android:background="@drawable/round_button1" />
+
+    <Button
+        android:id="@+id/seek_advice"
+        android:layout_width="376dp"
+        android:layout_height="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="120dp"
+        android:text="seek_advice"
+        android:background="@drawable/round_button" />
+
+    <FrameLayout
+        android:id="@+id/current_reading_box"
+        android:layout_width="376dp"
+        android:layout_height="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="220dp"
+        android:background="@drawable/round_button1" >
+
+        <TextView
+            android:id="@+id/current_reading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="current_reading"
+            android:textAlignment="viewStart"
+            android:gravity="top|start"
+            android:paddingStart="1dp"
+            android:paddingTop="1dp"/>
+
+        <TextView
+            android:id="@+id/CurrentReadingValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="1dp"
+            android:paddingTop="25dp"
+            android:text="current_reading_value"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/graphContainer"
+        android:layout_width="376dp"
+        android:layout_height="213dp"
+        android:layout_marginTop="130dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/round_button">
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/semicircleView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="-150dp"
+        android:background="@drawable/round_button2" />
+
+
+</RelativeLayout>
